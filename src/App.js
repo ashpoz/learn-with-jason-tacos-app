@@ -25,20 +25,24 @@ const tacos = [
 function App() {
   const [responses, setResponses] = useState([]);
   const [activeTaco, setActiveTaco] = useState(0);
-  const [tastiness, setTastiness] = useState(3);
+  const [tastinessScore, setTastinessScore] = useState(3);
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
 
     const taco = tacos[activeTaco];
     const newResponses = [
       ...responses,
-      { tacoId: taco.tacoId, tastiness, isTacoBell: taco.isTacoBell }
+      { tacoId: taco.tacoId, tastinessScore, isTacoBell: taco.isTacoBell }
     ]
     // save current taco id and rating
     setResponses(newResponses);
     // then, check if last taco
     if (activeTaco === tacos.length - 1) {
+      await fetch('/.netlify/functions/hasura-add-response', {
+        method: 'POST',
+        body: JSON.stringify({ responses : newResponses })
+      });
       // TODO: implement submission
       console.log('save responses');
       console.log(newResponses);
@@ -46,7 +50,7 @@ function App() {
     }
     // if not, show next taco
     setActiveTaco(activeTaco + 1);
-    setTastiness(3);
+    setTastinessScore(3);
     // if so, save response to db
   }
 
@@ -65,7 +69,7 @@ function App() {
             <label htmlFor="amount">
               Choose 1 for "trash" and 5 for "God level"
             </label>
-            <input id="amount" type="range" min={1} max={5} onChange={(event) => setTastiness(parseInt(event.target.value))} list="tickmarks" value={tastiness} />
+            <input id="amount" type="range" min={1} max={5} onChange={(event) => setTastinessScore(parseInt(event.target.value))} list="tickmarks" value={tastinessScore} />
             <datalist id="tickmarks">
               <option value="1" label="1"></option>
               <option value="2"></option>
